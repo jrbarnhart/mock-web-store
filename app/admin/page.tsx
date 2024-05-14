@@ -19,10 +19,15 @@ async function getSalesData() {
   };
 }
 
-export default function AdminDashboard() {
+export default async function AdminDashboard() {
+  const salesData = await getSalesData();
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <DashboardCard title="Sales" subtitle="Test" body="body" />
+      <DashboardCard
+        title="Sales"
+        subtitle={salesData.numberOfSales}
+        body={salesData.amount}
+      />
     </div>
   );
 }
