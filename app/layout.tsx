@@ -25,7 +25,7 @@ export default function RootLayout({
         )}
       >
         <nav>
-          <ul className="grid grid-flow-col gap-y-3 justify-items-center p-6 bg-zinc-950 font-bold text-lg">
+          <ul className="grid grid-flow-col gap-y-3 justify-items-center p-6 bg-zinc-300 font-bold text-lg">
             <Link href="/">Home</Link>
             <Link href="/products">Products</Link>
             <Link href="/dashboard">Admin</Link>
