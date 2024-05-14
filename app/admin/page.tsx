@@ -1,3 +1,4 @@
+import prisma from "@/components/db/db";
 import {
   Card,
   CardContent,
@@ -5,6 +6,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
+async function getSalesData() {
+  const data = await prisma.order.aggregate({
+    _sum: { totalPaidInCents: true },
+    _count: true,
+  });
+
+  return {
+    amount: (data._sum.totalPaidInCents || 0) / 100,
+    numberOfSales: data._count,
+  };
+}
 
 export default function AdminDashboard() {
   return (
