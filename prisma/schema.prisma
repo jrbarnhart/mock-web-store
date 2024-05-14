@@ -27,11 +27,11 @@ model User {
 }
 
 model Product {
-  id          String      @id @default(cuid())
-  name        String
-  description String?
-  price       Int
-  OrderItem   OrderItem[]
+  id           String      @id @default(cuid())
+  name         String
+  priceInCents Int
+  description  String
+  OrderItem    OrderItem[]
 }
 
 model OrderItem {
