@@ -37,10 +37,23 @@ async function getUserData() {
   };
 }
 
+async function getProductData() {
+  const [activeCount, inactiveCount] = await Promise.all([
+    prisma.product.count({ where: { availableForPurchase: true } }),
+    prisma.product.count({ where: { availableForPurchase: false } }),
+  ]);
+
+  return {
+    activeCount,
+    inactiveCount,
+  };
+}
+
 export default async function AdminDashboard() {
-  const [salesData, userData] = await Promise.all([
+  const [salesData, userData, productData] = await Promise.all([
     getSalesData(),
     getUserData(),
+    getProductData(),
   ]);
 
   return (
@@ -56,6 +69,11 @@ export default async function AdminDashboard() {
           userData.averagePaidPerUser
         )} Average Value`}
         body={`${formatNumber(userData.userCount)}`}
+      />
+      <DashboardCard
+        title="Active Products"
+        subtitle={`${formatNumber(productData.inactiveCount)} Inactive`}
+        body={formatNumber(productData.activeCount)}
       />
     </div>
   );
