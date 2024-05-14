@@ -20,32 +20,83 @@ enum Role {
 }
 
 model User {
+  id     String  @id @default(cuid())
   email  String  @unique
   name   String
   role   Role    @default(USER)
   orders Order[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Product {
-  id           String      @id @default(cuid())
-  name         String
-  priceInCents Int
-  description  String
-  OrderItem    OrderItem[]
+  id                   String  @id @default(cuid())
+  name                 String
+  description          String
+  priceInCents         Int
+  imageSource          String
+  availableForPurchase Boolean
+
+  tags       TagOnProduct[]
+  orderItems OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model OrderItem {
-  id        String  @id @default(cuid())
-  quantity  Int
-  order     Order   @relation(fields: [orderId], references: [id])
-  orderId   String
-  product   Product @relation(fields: [productId], references: [id])
+model ProductTag {
+  id              String         @id @default(cuid())
+  name            String         @unique
+  productsWithTag TagOnProduct[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TagOnProduct {
+  id String @id @default(cuid())
+
   productId String
+  tagId     String
+  product   Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  tag       ProductTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
 }
 
 model Order {
-  id     String      @id @default(cuid())
-  user   User        @relation(fields: [userId], references: [email])
-  userId String
-  items  OrderItem[]
+  id               String      @id @default(cuid())
+  status           OrderStatus @default(PENDING)
+  totalPaidInCents Int
+
+  orderItems OrderItem[]
+  userId     String
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OrderItem {
+  id               String @id @default(cuid())
+  pricePaidInCents Int
+  quantity         Int
+
+  orderId   String
+  productId String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
