@@ -65,7 +65,7 @@ function TagSelection({
     }
     const newTag = inputRef.current.value.toLowerCase().trim();
     if (newTag !== "" && !tags.includes(newTag)) {
-      setTags((prev) => [...prev, newTag]);
+      setTags((prev) => [...prev, newTag].sort());
       inputRef.current.value = "";
     }
   }
