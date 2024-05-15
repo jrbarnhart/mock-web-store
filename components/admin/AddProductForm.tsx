@@ -1,6 +1,6 @@
 "use client";
 
-import { SetStateAction, useState } from "react";
+import { useRef, SetStateAction, useState } from "react";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { formatCurrency } from "@/lib/formatters";
@@ -9,13 +9,7 @@ import { Button } from "../ui/button";
 
 export function AddProductForm() {
   const [priceInCents, setPriceInCents] = useState<number>();
-  const [tags, setTags] = useState<string[]>([
-    "household",
-    "pillow",
-    "sale",
-    "purple",
-    "fuzzy",
-  ]);
+  const [tags, setTags] = useState<string[]>([]);
 
   return (
     <form className="space-y-8">
@@ -57,10 +51,34 @@ function TagSelection({
   tags: string[];
   setTags: React.Dispatch<SetStateAction<string[]>>;
 }) {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  function handleKeyDown(event: React.KeyboardEvent) {
+    if (event.key === "Enter") {
+      handleEnterKeyPress();
+    }
+  }
+
+  function handleEnterKeyPress() {
+    if (!inputRef.current) {
+      return;
+    }
+    const newTag = inputRef.current.value.toLowerCase().trim();
+    if (newTag !== "" && !tags.includes(newTag)) {
+      setTags((prev) => [...prev, newTag]);
+      inputRef.current.value = "";
+    }
+  }
+
   return (
     <div className="space-y-2">
       <Label htmlFor="add-tag">Add Tags</Label>
-      <Input type="text" id="add-tag" />
+      <Input
+        type="text"
+        id="add-tag"
+        ref={inputRef}
+        onKeyDown={handleKeyDown}
+      />
       <div className="flex flex-wrap gap-2 pt-1 text-sm font-bold">
         {tags.map((tag, index) => {
           return (
