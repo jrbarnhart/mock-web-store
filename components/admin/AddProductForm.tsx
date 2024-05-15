@@ -1,5 +1,85 @@
 "use client";
 
+import { SetStateAction, useState } from "react";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { formatCurrency } from "@/lib/formatters";
+import { Textarea } from "../ui/textarea";
+import { Button } from "../ui/button";
+
 export function AddProductForm() {
-  return <></>;
+  const [priceInCents, setPriceInCents] = useState<number>();
+  const [tags, setTags] = useState<string[]>([
+    "household",
+    "pillow",
+    "sale",
+    "purple",
+    "fuzzy",
+  ]);
+
+  return (
+    <form className="space-y-8">
+      <div className="space-y-2">
+        <Label htmlFor="name">Name</Label>
+        <Input type="text" id="name" name="name" required />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="price-cents">Price In Cents</Label>
+        <Input
+          type="number"
+          id="price-cents"
+          name="price-cents"
+          required
+          value={priceInCents}
+          onChange={(e) => setPriceInCents(Number(e.target.value) || undefined)}
+        />
+        <div className="text-muted-foreground">
+          {formatCurrency((priceInCents || 0) / 100)}
+        </div>
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="description">Description</Label>
+        <Textarea id="description" name="description" required />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="name">Name</Label>
+        <Input type="text" id="name" name="name" required />
+      </div>
+      <TagSelection tags={tags} setTags={setTags} />
+    </form>
+  );
+}
+
+function TagSelection({
+  tags,
+  setTags,
+}: {
+  tags: string[];
+  setTags: React.Dispatch<SetStateAction<string[]>>;
+}) {
+  return (
+    <div className="space-y-2">
+      <Label htmlFor="add-tag">Add Tags</Label>
+      <Input type="text" id="add-tag" />
+      <div className="flex flex-wrap gap-2 pt-1 text-sm font-bold">
+        {tags.map((tag, index) => {
+          return (
+            <div
+              key={index}
+              className="flex items-center bg-primary text-primary-foreground rounded-md pl-4"
+            >
+              <p className="flex">{tag[0].toUpperCase() + tag.slice(1)}</p>
+              <Button
+                aria-label="Remove Tag"
+                type="button"
+                className="text-red-500 h-8"
+              >
+                X
+              </Button>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
