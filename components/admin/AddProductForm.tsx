@@ -70,6 +70,10 @@ function TagSelection({
     }
   }
 
+  function handleRemoveTagClick(tag: string) {
+    setTags((prev) => prev.filter((value) => value !== tag));
+  }
+
   return (
     <div className="space-y-2">
       <Label htmlFor="add-tag">Add Tags</Label>
@@ -80,10 +84,10 @@ function TagSelection({
         onKeyDown={handleKeyDown}
       />
       <div className="flex flex-wrap gap-2 pt-1 text-sm font-bold">
-        {tags.map((tag, index) => {
+        {tags.map((tag) => {
           return (
             <div
-              key={index}
+              key={tag}
               className="flex items-center bg-primary text-primary-foreground rounded-md pl-4"
             >
               <p className="flex">{tag[0].toUpperCase() + tag.slice(1)}</p>
@@ -91,6 +95,9 @@ function TagSelection({
                 aria-label="Remove Tag"
                 type="button"
                 className="text-red-500 h-8"
+                onClick={() => {
+                  handleRemoveTagClick(tag);
+                }}
               >
                 X
               </Button>
