@@ -24,6 +24,10 @@ export function AddProductForm() {
         <Input type="text" id="name" name="name" required />
       </div>
       <div className="space-y-2">
+        <Label htmlFor="image">Image</Label>
+        <Input type="file" id="image" name="image" required />
+      </div>
+      <div className="space-y-2">
         <Label htmlFor="price-cents">Price In Cents</Label>
         <Input
           type="number"
