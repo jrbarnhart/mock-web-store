@@ -1,6 +1,8 @@
 "use server";
 
 import { z } from "zod";
+import { put } from "@vercel/blob";
+import prisma from "@/components/db/db";
 
 const fileSchema = z.instanceof(File, { message: "Required" });
 
@@ -16,6 +18,37 @@ const addProductSchema = z.object({
   availableForPurchase: z.boolean(),
   tags: z.string().array(),
 });
+
+async function addProductData(
+  imageSource: string,
+  data: {
+    name: string;
+    description: string;
+    priceInCents: number;
+    imageSource: File;
+    availableForPurchase: boolean;
+    tags: string[];
+  }
+) {
+  // Create database entry
+
+  // Check if tags exist
+
+  return await prisma.$transaction([
+    // Create needed tags
+    // Create product
+    prisma.product.create({
+      data: {
+        name: data.name,
+        description: data.description,
+        priceInCents: data.priceInCents,
+        imageSource: imageSource,
+        availableForPurchase: data.availableForPurchase,
+      },
+    }),
+    // Create join table TagsOnProduct
+  ]);
+}
 
 export async function addProduct(formData: FormData) {
   // JSON.parse to get correct data
@@ -42,4 +75,12 @@ export async function addProduct(formData: FormData) {
   console.log("Success!");
   const data = result.data;
   console.log(data);
+
+  // Add image to Vercel Blob
+  const imageFile = formData.get("imageSource") as File;
+  const { url: imageSource } = await put(imageFile.name, imageFile, {
+    access: "public",
+  });
+
+  addProductData(imageSource, data);
 }
