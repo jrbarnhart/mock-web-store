@@ -19,6 +19,7 @@ export function AddProductForm() {
   }
 
   function handleSubmit(formData: FormData) {
+    formData.append("available", JSON.stringify(available));
     formData.append("tags", JSON.stringify(tags));
     addProduct(formData);
   }
@@ -55,7 +56,6 @@ export function AddProductForm() {
         <Label htmlFor="available">Available For Purchase</Label>
         <div className="flex gap-2">
           <Switch
-            name="available"
             checked={available}
             onCheckedChange={handleAvailableChanged}
             className={!available ? "border-2 border-destructive" : ""}
