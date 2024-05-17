@@ -19,7 +19,7 @@ export function AddProductForm() {
   }
 
   function handleSubmit(formData: FormData) {
-    formData.append("available-for-purchase", JSON.stringify(available));
+    formData.append("availableForPurchase", JSON.stringify(available));
     formData.append("tags", JSON.stringify(tags));
     addProduct(formData);
   }
@@ -31,15 +31,15 @@ export function AddProductForm() {
         <Input type="text" id="name" name="name" required />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="image-source">Image</Label>
-        <Input type="file" id="image-source" name="image-source" required />
+        <Label htmlFor="imageSource">Image</Label>
+        <Input type="file" id="imageSource" name="imageSource" required />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="price-in-cents">Price In Cents</Label>
+        <Label htmlFor="priceInCents">Price In Cents</Label>
         <Input
           type="number"
-          id="price-in-cents"
-          name="price-in-cents"
+          id="priceInCents"
+          name="priceInCents"
           required
           value={priceInCents}
           onChange={(e) => setPriceInCents(Number(e.target.value) || undefined)}
@@ -53,10 +53,10 @@ export function AddProductForm() {
         <Textarea id="description" name="description" required />
       </div>
       <div className="space-y-2 grid">
-        <Label htmlFor="available-for-purchase">Available For Purchase</Label>
+        <Label htmlFor="availableForPurchase">Available For Purchase</Label>
         <div className="flex gap-2">
           <Switch
-            id="available-for-purchase"
+            id="availableForPurchase"
             checked={available}
             onCheckedChange={handleAvailableChanged}
             className={!available ? "border-2 border-destructive" : ""}
