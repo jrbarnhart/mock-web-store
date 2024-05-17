@@ -59,6 +59,7 @@ export function AddProductForm() {
       <div className="space-y-2">
         <TagSelection tags={tags} setTags={setTags} />
       </div>
+      <Button type="submit">Save</Button>
     </form>
   );
 }
