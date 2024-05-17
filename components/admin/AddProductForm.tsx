@@ -6,10 +6,16 @@ import { Label } from "../ui/label";
 import { formatCurrency } from "@/lib/formatters";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
+import { Switch } from "../ui/switch";
 
 export function AddProductForm() {
   const [priceInCents, setPriceInCents] = useState<number>();
   const [tags, setTags] = useState<string[]>([]);
+  const [available, setAvailable] = useState<boolean>(true);
+
+  function handleAvailableChanged() {
+    setAvailable((prev) => !prev);
+  }
 
   return (
     <form className="space-y-8">
@@ -35,9 +41,16 @@ export function AddProductForm() {
         <Label htmlFor="description">Description</Label>
         <Textarea id="description" name="description" required />
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="name">Name</Label>
-        <Input type="text" id="name" name="name" required />
+      <div className="space-y-2 grid">
+        <Label htmlFor="available">Available For Purchase</Label>
+        <div className="flex gap-2">
+          <Switch
+            checked={available}
+            onCheckedChange={handleAvailableChanged}
+            className={!available ? "border-2 border-destructive" : ""}
+          />
+          <p className="text-muted-foreground">{available ? "Yes" : "No"}</p>
+        </div>
       </div>
       <div className="space-y-2">
         <TagSelection tags={tags} setTags={setTags} />
