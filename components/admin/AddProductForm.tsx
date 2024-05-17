@@ -7,6 +7,7 @@ import { formatCurrency } from "@/lib/formatters";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { Switch } from "../ui/switch";
+import { addProduct } from "@/app/admin/_actions/products";
 
 export function AddProductForm() {
   const [priceInCents, setPriceInCents] = useState<number>();
@@ -17,8 +18,13 @@ export function AddProductForm() {
     setAvailable((prev) => !prev);
   }
 
+  function handleSubmit(formData: FormData) {
+    formData.append("tags", JSON.stringify(tags));
+    addProduct(formData);
+  }
+
   return (
-    <form className="space-y-8">
+    <form action={handleSubmit} className="space-y-8">
       <div className="space-y-2">
         <Label htmlFor="name">Name</Label>
         <Input type="text" id="name" name="name" required />
@@ -49,6 +55,7 @@ export function AddProductForm() {
         <Label htmlFor="available">Available For Purchase</Label>
         <div className="flex gap-2">
           <Switch
+            name="available"
             checked={available}
             onCheckedChange={handleAvailableChanged}
             className={!available ? "border-2 border-destructive" : ""}
@@ -75,6 +82,7 @@ function TagSelection({
 
   function handleKeyDown(event: React.KeyboardEvent) {
     if (event.key === "Enter") {
+      event.preventDefault();
       handleEnterKeyPress();
     }
   }
