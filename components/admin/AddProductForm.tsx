@@ -39,7 +39,9 @@ export function AddProductForm() {
         <Label htmlFor="name">Name</Label>
         <Input type="text" id="name" name="name" required />
       </div>
-      <TagSelection tags={tags} setTags={setTags} />
+      <div className="space-y-2">
+        <TagSelection tags={tags} setTags={setTags} />
+      </div>
     </form>
   );
 }
@@ -75,7 +77,7 @@ function TagSelection({
   }
 
   return (
-    <div className="space-y-2">
+    <>
       <Label htmlFor="add-tag">Add Tags</Label>
       <Input
         type="text"
@@ -105,6 +107,6 @@ function TagSelection({
           );
         })}
       </div>
-    </div>
+    </>
   );
 }
