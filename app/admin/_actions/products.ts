@@ -26,7 +26,6 @@ async function createOrUpdateTags(tagNames: string[]) {
   // Start a transaction
   await prisma.$transaction(async (tx) => {
     for (const tagName of tagNames) {
-      console.log(`Upserting tag: ${tagName}`);
       const tag = await tx.tag.upsert({
         where: { name: tagName },
         create: { name: tagName },
@@ -67,13 +66,11 @@ export async function addProduct(formData: FormData) {
     };
   }
 
-  console.log("Start validation...", dataEntries);
   const result = addProductSchema.safeParse(dataEntries);
   if (result.success === false) {
     console.error("Failure!", result.error.formErrors.fieldErrors);
     return { success: false, error: result.error.formErrors.fieldErrors };
   }
-  console.log("Success!");
   const data = result.data;
 
   try {
@@ -113,7 +110,6 @@ export async function addProduct(formData: FormData) {
       })),
     });
 
-    console.log("Product data added!");
     return { success: true };
   } catch (error) {
     console.error("An error occurred while adding product to database.", error);
