@@ -97,19 +97,19 @@ export async function addProduct(formData: FormData) {
   if (!dataEntriesRes.success) return dataEntriesRes;
 
   // Validate dataEntries into data with Zod
-  const result = addProductSchema.safeParse(dataEntriesRes.dataEntries);
-  if (result.success === false) {
+  const zodResult = addProductSchema.safeParse(dataEntriesRes.dataEntries);
+  if (zodResult.success === false) {
     console.error(
       "Failure: Zod validation.",
-      result.error.formErrors.fieldErrors
+      zodResult.error.formErrors.fieldErrors
     );
     return {
       success: false,
       message: "Failure: Zod validation.",
-      error: result.error.formErrors.fieldErrors,
+      error: zodResult.error.formErrors.fieldErrors,
     };
   }
-  const data = result.data;
+  const data = zodResult.data;
 
   try {
     // Upload image to Vercel Blob
