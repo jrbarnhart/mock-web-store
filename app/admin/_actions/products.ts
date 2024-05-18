@@ -28,8 +28,8 @@ const addProductSchema = z.object({
   tags: z.string().array(),
 });
 
+// Helper functions
 async function uploadImage(data: ProductDataObject) {
-  // Add image to Vercel Blob - Disabled for testing
   const imageFile = data.image;
   const { url: imageSource } = await put(imageFile.name, imageFile, {
     access: "public",
@@ -64,7 +64,7 @@ async function createOrUpdateTags(tagNames: string[]) {
   return tags;
 }
 
-export async function addProduct(formData: FormData) {
+function dataEntriesFromForm(formData: FormData) {
   // JSON.parse to convert from strings to values
   const dataEntries = Object.fromEntries(formData.entries());
   try {
@@ -80,16 +80,24 @@ export async function addProduct(formData: FormData) {
         dataEntries.availableForPurchase = JSON.parse(availableValue);
       }
     }
+    return { success: true, message: "Data entries parsed.", dataEntries };
   } catch (error) {
     console.error("Failure: JSON parsing formData.", error);
     return {
       success: false,
       message: "Failure: JSON parsing formData.",
+      dataEntries: null,
     };
   }
+}
+
+export async function addProduct(formData: FormData) {
+  // JSON.parse to convert from strings to values
+  const dataEntriesRes = dataEntriesFromForm(formData);
+  if (!dataEntriesRes.success) return dataEntriesRes;
 
   // Validate dataEntries into data with Zod
-  const result = addProductSchema.safeParse(dataEntries);
+  const result = addProductSchema.safeParse(dataEntriesRes.dataEntries);
   if (result.success === false) {
     console.error(
       "Failure: Zod validation.",
@@ -105,8 +113,8 @@ export async function addProduct(formData: FormData) {
 
   try {
     // Upload image to Vercel Blob
-    const imageResponse = await uploadImage(data);
-    if (!imageResponse.success) return imageResponse;
+    const uploadImageRes = await uploadImage(data);
+    if (!uploadImageRes.success) return uploadImageRes;
 
     // Create product data in database
     const product = await prisma.product.create({
@@ -114,7 +122,7 @@ export async function addProduct(formData: FormData) {
         name: data.name,
         description: data.description,
         priceInCents: data.priceInCents,
-        imageSource: imageResponse.imageSource,
+        imageSource: uploadImageRes.imageSource,
         availableForPurchase: data.availableForPurchase,
       },
     });
