@@ -20,12 +20,12 @@ export function AddProductForm() {
   }
 
   async function handleSubmit(formData: FormData) {
-    formData.append("availableForPurchase", JSON.stringify(available));
+    /*     formData.append("availableForPurchase", JSON.stringify(available));
     formData.append("tags", JSON.stringify(tags));
     const response = await addProduct(formData);
     if (response.success === true) {
       redirect("/admin/products");
-    }
+    } */
   }
 
   return (
