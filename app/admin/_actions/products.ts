@@ -86,8 +86,8 @@ export async function addProduct(formData: FormData) {
         dataEntries.availableForPurchase = JSON.parse(availableValue);
       }
     }
-  } catch (error) {
-    return error;
+  } catch {
+    return new Error("Error parsing JSON from form data.");
   }
 
   console.log("Start validation...", dataEntries);
@@ -101,7 +101,7 @@ export async function addProduct(formData: FormData) {
 
   try {
     // Add image to Vercel Blob
-    const imageFile = formData.get("imageSource") as File;
+    const imageFile = data.image;
     const { url: imageSource } = await put(imageFile.name, imageFile, {
       access: "public",
     });
@@ -115,7 +115,7 @@ export async function addProduct(formData: FormData) {
     // Add data to database
     const productData = await addProductData(imageSource, data);
     console.log("Product data added!", productData);
-  } catch (error) {
-    return error;
+  } catch {
+    return new Error("An error occurred while adding product to database.");
   }
 }
