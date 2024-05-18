@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { put } from "@vercel/blob";
 import prisma from "@/components/db/db";
+import { Tag } from "@prisma/client";
 
 const fileSchema = z.instanceof(File, { message: "Required" });
 
@@ -18,6 +19,25 @@ const addProductSchema = z.object({
   availableForPurchase: z.boolean(),
   tags: z.string().array(),
 });
+
+async function createOrUpdateTags(tagNames: string[]) {
+  const tags: Tag[] = [];
+
+  // Start a transaction
+  await prisma.$transaction(async (tx) => {
+    for (const tagName of tagNames) {
+      console.log(`Upserting tag: ${tagName}`);
+      const tag = await tx.tag.upsert({
+        where: { name: tagName },
+        create: { name: tagName },
+        update: {},
+      });
+      tags.push(tag);
+    }
+  });
+
+  return tags;
+}
 
 export async function addProduct(formData: FormData) {
   // JSON.parse to convert from strings to values
@@ -51,13 +71,13 @@ export async function addProduct(formData: FormData) {
   const result = addProductSchema.safeParse(dataEntries);
   if (result.success === false) {
     console.error("Failure!", result.error.formErrors.fieldErrors);
-    return result.error.formErrors.fieldErrors;
+    return { success: false, error: result.error.formErrors.fieldErrors };
   }
   console.log("Success!");
   const data = result.data;
 
   try {
-    // Add image to Vercel Blob
+    // Add image to Vercel Blob - Disabled for testing
     const imageFile = data.image;
     const { url: imageSource } = await put(imageFile.name, imageFile, {
       access: "public",
@@ -79,17 +99,18 @@ export async function addProduct(formData: FormData) {
         priceInCents: data.priceInCents,
         imageSource,
         availableForPurchase: data.availableForPurchase,
-        tags: {
-          create: data.tags.map((tag) => ({
-            tag: {
-              connectOrCreate: {
-                where: { name: tag },
-                create: { name: tag },
-              },
-            },
-          })),
-        },
       },
+    });
+
+    // Create or fetch tags
+    const tags = await createOrUpdateTags(data.tags);
+    const tagsIds = tags.map((tag) => ({ id: tag.id }));
+
+    const productTags = await prisma.productTag.createMany({
+      data: tagsIds.map((tagId) => ({
+        tagId: tagId.id,
+        productId: product.id,
+      })),
     });
 
     console.log("Product data added!");
