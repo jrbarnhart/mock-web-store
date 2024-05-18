@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { put } from "@vercel/blob";
 import prisma from "@/components/db/db";
+import { TagOnProduct } from "@prisma/client";
 
 const fileSchema = z.instanceof(File, { message: "Required" });
 
@@ -30,14 +31,29 @@ async function addProductData(
     tags: string[];
   }
 ) {
-  // Create database entry
+  return prisma.$transaction(async (tx) => {
+    // Return list of tag names not in db yet
+    const existingTags = await prisma.productTag.findMany();
+    let existingTagNames = existingTags.map((tag) => tag.name);
+    const newTags = data.tags.filter((tag) => !existingTagNames.includes(tag));
 
-  // Check if tags exist
+    // Create new tags if needed
+    if (newTags.length > 0) {
+      await prisma.productTag.createMany({
+        data: newTags.map((name) => ({ name })),
+        skipDuplicates: true,
+      });
+    }
 
-  return await prisma.$transaction([
-    // Create needed tags
-    // Create product
-    prisma.product.create({
+    const updatedTags = await prisma.productTag.findMany();
+
+    // Get ids for tags on product
+    const productTagIds = updatedTags
+      .filter((tag) => data.tags.includes(tag.name))
+      .map((tag) => tag.id);
+
+    // Create the product
+    const product = await prisma.product.create({
       data: {
         name: data.name,
         description: data.description,
@@ -45,9 +61,14 @@ async function addProductData(
         imageSource: imageSource,
         availableForPurchase: data.availableForPurchase,
       },
-    }),
-    // Create join table TagsOnProduct
-  ]);
+    });
+
+    await prisma.tagOnProduct.createMany({
+      data: productTagIds.map((tagId) => ({ tagId, productId: product.id })),
+    });
+
+    return product;
+  });
 }
 
 export async function addProduct(formData: FormData) {
@@ -82,5 +103,12 @@ export async function addProduct(formData: FormData) {
     access: "public",
   });
 
-  addProductData(imageSource, data);
+  if (imageSource === undefined || imageSource === "") {
+    return new Error(
+      "There was an error while uploading image to Vercel Blob."
+    );
+  }
+
+  const productData = await addProductData(imageSource, data);
+  console.log("Product data added!", productData);
 }
