@@ -8,6 +8,7 @@ import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { Switch } from "../ui/switch";
 import { addProduct } from "@/app/admin/_actions/products";
+import { redirect } from "next/navigation";
 
 export function AddProductForm() {
   const [priceInCents, setPriceInCents] = useState<number>();
@@ -18,10 +19,13 @@ export function AddProductForm() {
     setAvailable((prev) => !prev);
   }
 
-  function handleSubmit(formData: FormData) {
+  async function handleSubmit(formData: FormData) {
     formData.append("availableForPurchase", JSON.stringify(available));
     formData.append("tags", JSON.stringify(tags));
-    addProduct(formData);
+    const response = await addProduct(formData);
+    if (response.success === true) {
+      redirect("/admin/products");
+    }
   }
 
   return (
