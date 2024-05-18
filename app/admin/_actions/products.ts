@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { put } from "@vercel/blob";
 import prisma from "@/components/db/db";
-import { Tag } from "@prisma/client";
+import { Prisma, Tag } from "@prisma/client";
 
 interface ProductDataObject {
   name: string;
@@ -29,41 +29,6 @@ const addProductSchema = z.object({
 });
 
 // Helper functions
-async function uploadImage(data: ProductDataObject) {
-  const imageFile = data.image;
-  const { url: imageSource } = await put(imageFile.name, imageFile, {
-    access: "public",
-  });
-
-  if (imageSource === undefined || imageSource === "") {
-    console.error("Failure: Uploading image to Vercel Blob.");
-    return {
-      success: false,
-      imageSource: "",
-      message: "Failure: Uploading image to Vercel Blob.",
-    };
-  }
-
-  return { success: true, imageSource, message: "Image upload complete." };
-}
-
-async function createOrUpdateTags(tagNames: string[]) {
-  const tags: Tag[] = [];
-
-  await prisma.$transaction(async (tx) => {
-    for (const tagName of tagNames) {
-      const tag = await tx.tag.upsert({
-        where: { name: tagName },
-        create: { name: tagName },
-        update: {},
-      });
-      tags.push(tag);
-    }
-  });
-
-  return tags;
-}
-
 function dataEntriesFromForm(formData: FormData) {
   // JSON.parse to convert from strings to values
   const dataEntries = Object.fromEntries(formData.entries());
@@ -89,6 +54,42 @@ function dataEntriesFromForm(formData: FormData) {
       dataEntries: null,
     };
   }
+}
+
+async function uploadImage(data: ProductDataObject) {
+  const imageFile = data.image;
+  const { url: imageSource } = await put(imageFile.name, imageFile, {
+    access: "public",
+  });
+
+  if (imageSource === undefined || imageSource === "") {
+    console.error("Failure: Uploading image to Vercel Blob.");
+    return {
+      success: false,
+      imageSource: "",
+      message: "Failure: Uploading image to Vercel Blob.",
+    };
+  }
+
+  return { success: true, imageSource, message: "Image upload complete." };
+}
+
+async function createOrUpdateTags(
+  tagNames: string[],
+  tx: Prisma.TransactionClient
+) {
+  const tags: Tag[] = [];
+
+  for (const tagName of tagNames) {
+    const tag = await tx.tag.upsert({
+      where: { name: tagName },
+      create: { name: tagName },
+      update: {},
+    });
+    tags.push(tag);
+  }
+
+  return tags;
 }
 
 export async function addProduct(formData: FormData) {
