@@ -5,6 +5,15 @@ import { put } from "@vercel/blob";
 import prisma from "@/components/db/db";
 import { Tag } from "@prisma/client";
 
+interface ProductDataObject {
+  name: string;
+  description: string;
+  priceInCents: number;
+  image: File;
+  availableForPurchase: boolean;
+  tags: string[];
+}
+
 const fileSchema = z.instanceof(File, { message: "Required" });
 
 const imageSchema = fileSchema.refine(
@@ -20,10 +29,28 @@ const addProductSchema = z.object({
   tags: z.string().array(),
 });
 
+async function uploadImage(data: ProductDataObject) {
+  // Add image to Vercel Blob - Disabled for testing
+  const imageFile = data.image;
+  const { url: imageSource } = await put(imageFile.name, imageFile, {
+    access: "public",
+  });
+
+  if (imageSource === undefined || imageSource === "") {
+    console.error("An error occurred while uploading image to Vercel Blob.");
+    return {
+      success: false,
+      imageSource: "",
+      message: "An error occurred while uploading image to Vercel Blob.",
+    };
+  }
+
+  return { success: true, imageSource, message: "Image upload complete." };
+}
+
 async function createOrUpdateTags(tagNames: string[]) {
   const tags: Tag[] = [];
 
-  // Start a transaction
   await prisma.$transaction(async (tx) => {
     for (const tagName of tagNames) {
       const tag = await tx.tag.upsert({
@@ -75,18 +102,8 @@ export async function addProduct(formData: FormData) {
 
   try {
     // Add image to Vercel Blob - Disabled for testing
-    const imageFile = data.image;
-    const { url: imageSource } = await put(imageFile.name, imageFile, {
-      access: "public",
-    });
-
-    if (imageSource === undefined || imageSource === "") {
-      console.error("An error occurred while uploading image to Vercel Blob.");
-      return {
-        success: false,
-        message: "An error occurred while uploading image to Vercel Blob.",
-      };
-    }
+    const imageResponse = await uploadImage(data);
+    if (!imageResponse.success) return imageResponse;
 
     // Add data to database
     const product = await prisma.product.create({
@@ -94,7 +111,7 @@ export async function addProduct(formData: FormData) {
         name: data.name,
         description: data.description,
         priceInCents: data.priceInCents,
-        imageSource,
+        imageSource: imageResponse.imageSource,
         availableForPurchase: data.availableForPurchase,
       },
     });
