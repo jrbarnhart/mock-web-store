@@ -36,14 +36,21 @@ export async function addProduct(formData: FormData) {
         dataEntries.availableForPurchase = JSON.parse(availableValue);
       }
     }
-  } catch {
-    return new Error("Error parsing JSON from form data.");
+  } catch (error) {
+    console.error(
+      "An error occurred while parsing tags and availableForPurchase.",
+      error
+    );
+    return {
+      success: false,
+      message: "An error occurred while parsing tags and availableForPurchase.",
+    };
   }
 
   console.log("Start validation...", dataEntries);
   const result = addProductSchema.safeParse(dataEntries);
   if (result.success === false) {
-    console.log("Failure!", result.error.formErrors.fieldErrors);
+    console.error("Failure!", result.error.formErrors.fieldErrors);
     return result.error.formErrors.fieldErrors;
   }
   console.log("Success!");
@@ -57,9 +64,11 @@ export async function addProduct(formData: FormData) {
     });
 
     if (imageSource === undefined || imageSource === "") {
-      return new Error(
-        "There was an error while uploading image to Vercel Blob."
-      );
+      console.error("An error occurred while uploading image to Vercel Blob.");
+      return {
+        success: false,
+        message: "An error occurred while uploading image to Vercel Blob.",
+      };
     }
 
     // Add data to database
@@ -83,8 +92,13 @@ export async function addProduct(formData: FormData) {
       },
     });
 
-    console.log("Product data added!", product);
-  } catch {
-    return new Error("An error occurred while adding product to database.");
+    console.log("Product data added!");
+    return { success: true };
+  } catch (error) {
+    console.error("An error occurred while adding product to database.", error);
+    return {
+      success: false,
+      message: "An error occurred while adding product to database.",
+    };
   }
 }
