@@ -55,6 +55,8 @@ model Tag {
 }
 
 model ProductTag {
+  id String @id @default(cuid())
+
   productId String
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
@@ -63,8 +65,6 @@ model ProductTag {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  @@id([productId, tagId])
 }
 
 enum OrderStatus {
