@@ -33,37 +33,36 @@ async function addProductData(
 ) {
   return prisma.$transaction(async (tx) => {
     // Return list of tag names not in db yet
-    const existingTags = await prisma.productTag.findMany();
+    const existingTags = await tx.productTag.findMany();
     let existingTagNames = existingTags.map((tag) => tag.name);
     const newTags = data.tags.filter((tag) => !existingTagNames.includes(tag));
 
     // Create new tags if needed
     if (newTags.length > 0) {
-      await prisma.productTag.createMany({
+      await tx.productTag.createMany({
         data: newTags.map((name) => ({ name })),
         skipDuplicates: true,
       });
     }
 
-    const updatedTags = await prisma.productTag.findMany();
-
     // Get ids for tags on product
+    const updatedTags = await tx.productTag.findMany();
     const productTagIds = updatedTags
       .filter((tag) => data.tags.includes(tag.name))
       .map((tag) => tag.id);
 
     // Create the product
-    const product = await prisma.product.create({
+    const product = await tx.product.create({
       data: {
         name: data.name,
         description: data.description,
         priceInCents: data.priceInCents,
-        imageSource: imageSource,
+        imageSource,
         availableForPurchase: data.availableForPurchase,
       },
     });
 
-    await prisma.tagOnProduct.createMany({
+    await tx.tagOnProduct.createMany({
       data: productTagIds.map((tagId) => ({ tagId, productId: product.id })),
     });
 
