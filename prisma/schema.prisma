@@ -38,32 +38,33 @@ model Product {
   imageSource          String
   availableForPurchase Boolean
 
-  tags       TagOnProduct[]
+  tags       ProductTag[]
   orderItems OrderItem[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-model ProductTag {
-  id              String         @id @default(cuid())
-  name            String         @unique
-  productsWithTag TagOnProduct[]
+model Tag {
+  id       String       @id @default(cuid())
+  name     String       @unique
+  products ProductTag[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-model TagOnProduct {
-  id String @id @default(cuid())
-
+model ProductTag {
   productId String
-  tagId     String
-  product   Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
-  tag       ProductTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  tagId String
+  tag   Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@id([productId, tagId])
 }
 
 enum OrderStatus {
