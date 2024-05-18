@@ -3,7 +3,6 @@
 import { z } from "zod";
 import { put } from "@vercel/blob";
 import prisma from "@/components/db/db";
-import { TagOnProduct } from "@prisma/client";
 
 const fileSchema = z.instanceof(File, { message: "Required" });
 
@@ -71,19 +70,24 @@ async function addProductData(
 }
 
 export async function addProduct(formData: FormData) {
-  // JSON.parse to get correct data
+  // JSON.parse to convert from strings to values
   const dataEntries = Object.fromEntries(formData.entries());
-  if ("tags" in dataEntries) {
-    const tagsValue = dataEntries.tags;
-    if (typeof tagsValue === "string") {
-      dataEntries.tags = JSON.parse(tagsValue);
+
+  try {
+    if ("tags" in dataEntries) {
+      const tagsValue = dataEntries.tags;
+      if (typeof tagsValue === "string") {
+        dataEntries.tags = JSON.parse(tagsValue);
+      }
     }
-  }
-  if ("availableForPurchase" in dataEntries) {
-    const availableValue = dataEntries.availableForPurchase;
-    if (typeof availableValue === "string") {
-      dataEntries.availableForPurchase = JSON.parse(availableValue);
+    if ("availableForPurchase" in dataEntries) {
+      const availableValue = dataEntries.availableForPurchase;
+      if (typeof availableValue === "string") {
+        dataEntries.availableForPurchase = JSON.parse(availableValue);
+      }
     }
+  } catch (error) {
+    return error;
   }
 
   console.log("Start validation...", dataEntries);
@@ -94,20 +98,24 @@ export async function addProduct(formData: FormData) {
   }
   console.log("Success!");
   const data = result.data;
-  console.log(data);
 
-  // Add image to Vercel Blob
-  const imageFile = formData.get("imageSource") as File;
-  const { url: imageSource } = await put(imageFile.name, imageFile, {
-    access: "public",
-  });
+  try {
+    // Add image to Vercel Blob
+    const imageFile = formData.get("imageSource") as File;
+    const { url: imageSource } = await put(imageFile.name, imageFile, {
+      access: "public",
+    });
 
-  if (imageSource === undefined || imageSource === "") {
-    return new Error(
-      "There was an error while uploading image to Vercel Blob."
-    );
+    if (imageSource === undefined || imageSource === "") {
+      return new Error(
+        "There was an error while uploading image to Vercel Blob."
+      );
+    }
+
+    // Add data to database
+    const productData = await addProductData(imageSource, data);
+    console.log("Product data added!", productData);
+  } catch (error) {
+    return error;
   }
-
-  const productData = await addProductData(imageSource, data);
-  console.log("Product data added!", productData);
 }
