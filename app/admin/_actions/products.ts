@@ -19,56 +19,6 @@ const addProductSchema = z.object({
   tags: z.string().array(),
 });
 
-async function addProductData(
-  imageSource: string,
-  data: {
-    name: string;
-    description: string;
-    priceInCents: number;
-    image: File;
-    availableForPurchase: boolean;
-    tags: string[];
-  }
-) {
-  return prisma.$transaction(async (tx) => {
-    // Return list of tag names not in db yet
-    const existingTags = await tx.tag.findMany();
-    let existingTagNames = existingTags.map((tag) => tag.name);
-    const newTags = data.tags.filter((tag) => !existingTagNames.includes(tag));
-
-    // Create new tags if needed
-    if (newTags.length > 0) {
-      await tx.tag.createMany({
-        data: newTags.map((name) => ({ name })),
-        skipDuplicates: true,
-      });
-    }
-
-    // Get ids for tags on product
-    const updatedTags = await tx.tag.findMany();
-    const productTagIds = updatedTags
-      .filter((tag) => data.tags.includes(tag.name))
-      .map((tag) => tag.id);
-
-    // Create the product
-    const product = await tx.product.create({
-      data: {
-        name: data.name,
-        description: data.description,
-        priceInCents: data.priceInCents,
-        imageSource,
-        availableForPurchase: data.availableForPurchase,
-      },
-    });
-
-    await tx.productTag.createMany({
-      data: productTagIds.map((tagId) => ({ tagId, productId: product.id })),
-    });
-
-    return product;
-  });
-}
-
 export async function addProduct(formData: FormData) {
   // JSON.parse to convert from strings to values
   const dataEntries = Object.fromEntries(formData.entries());
@@ -113,8 +63,27 @@ export async function addProduct(formData: FormData) {
     }
 
     // Add data to database
-    const productData = await addProductData(imageSource, data);
-    console.log("Product data added!", productData);
+    const product = await prisma.product.create({
+      data: {
+        name: data.name,
+        description: data.description,
+        priceInCents: data.priceInCents,
+        imageSource,
+        availableForPurchase: data.availableForPurchase,
+        tags: {
+          create: data.tags.map((tag) => ({
+            tag: {
+              connectOrCreate: {
+                where: { name: tag },
+                create: { name: tag },
+              },
+            },
+          })),
+        },
+      },
+    });
+
+    console.log("Product data added!", product);
   } catch {
     return new Error("An error occurred while adding product to database.");
   }
