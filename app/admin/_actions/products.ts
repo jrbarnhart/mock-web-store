@@ -15,7 +15,7 @@ const addProductSchema = z.object({
   name: z.string().min(1),
   description: z.string().min(1),
   priceInCents: z.coerce.number().int().min(1),
-  imageSource: imageSchema.refine((file) => file.size > 0, "Required"),
+  image: imageSchema.refine((file) => file.size > 0, "Required"),
   availableForPurchase: z.boolean(),
   tags: z.string().array(),
 });
@@ -26,7 +26,7 @@ async function addProductData(
     name: string;
     description: string;
     priceInCents: number;
-    imageSource: File;
+    image: File;
     availableForPurchase: boolean;
     tags: string[];
   }
