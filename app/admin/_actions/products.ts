@@ -118,26 +118,28 @@ export async function addProduct(formData: FormData) {
     if (!uploadImageRes.success) return uploadImageRes;
 
     // Create product data in database
-    const product = await prisma.product.create({
-      data: {
-        name: data.name,
-        description: data.description,
-        priceInCents: data.priceInCents,
-        imageSource: uploadImageRes.imageSource,
-        availableForPurchase: data.availableForPurchase,
-      },
-    });
+    await prisma.$transaction(async (tx) => {
+      const product = await tx.product.create({
+        data: {
+          name: data.name,
+          description: data.description,
+          priceInCents: data.priceInCents,
+          imageSource: uploadImageRes.imageSource,
+          availableForPurchase: data.availableForPurchase,
+        },
+      });
 
-    // Create or fetch tags
-    const tags = await createOrUpdateTags(data.tags);
-    const tagsIds = tags.map((tag) => ({ id: tag.id }));
+      // Create or fetch tags
+      const tags = await createOrUpdateTags(data.tags, tx);
+      const tagsIds = tags.map((tag) => ({ id: tag.id }));
 
-    // Create junction table entries for productTags
-    await prisma.productTag.createMany({
-      data: tagsIds.map((tagId) => ({
-        tagId: tagId.id,
-        productId: product.id,
-      })),
+      // Create junction table entries for productTags
+      await tx.productTag.createMany({
+        data: tagsIds.map((tagId) => ({
+          tagId: tagId.id,
+          productId: product.id,
+        })),
+      });
     });
 
     return { success: true, message: "Product created." };
