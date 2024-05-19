@@ -7,7 +7,7 @@ import { formatCurrency } from "@/lib/formatters";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { Switch } from "../ui/switch";
-import { addProduct } from "@/app/admin/_actions/products";
+import { addProduct } from "@/app/admin/_actions/addProduct";
 import { useFormState, useFormStatus } from "react-dom";
 import { redirect } from "next/navigation";
 import { ActionResponse } from "@/lib/types";
