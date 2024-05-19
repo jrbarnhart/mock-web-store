@@ -10,9 +10,15 @@ import { Switch } from "../ui/switch";
 import { addProduct } from "@/app/admin/_actions/products";
 import { useFormState, useFormStatus } from "react-dom";
 import { redirect } from "next/navigation";
+import { ActionResponse } from "@/lib/types";
 
 export function AddProductForm() {
-  const initialActionState = { message: "" };
+  const initialActionState: ActionResponse = {
+    success: false,
+    message: "",
+    payload: null,
+    fieldErrors: null,
+  };
   const [formState, formAction] = useFormState(addProduct, initialActionState);
   const [priceInCents, setPriceInCents] = useState<number>();
   const [tags, setTags] = useState<string[]>([]);
@@ -39,10 +45,16 @@ export function AddProductForm() {
       <div className="space-y-2">
         <Label htmlFor="name">Name</Label>
         <Input type="text" id="name" name="name" required />
+        {formState.fieldErrors?.name && (
+          <div className="text-destructive">{formState.fieldErrors.name}</div>
+        )}
       </div>
       <div className="space-y-2">
         <Label htmlFor="image">Image</Label>
         <Input type="file" id="image" name="image" required />
+        {formState.fieldErrors?.image && (
+          <div className="text-destructive">{formState.fieldErrors.image}</div>
+        )}
       </div>
       <div className="space-y-2">
         <Label htmlFor="priceInCents">Price In Cents</Label>
@@ -54,6 +66,11 @@ export function AddProductForm() {
           value={priceInCents}
           onChange={(e) => setPriceInCents(Number(e.target.value) || undefined)}
         />
+        {formState.fieldErrors?.priceInCents && (
+          <div className="text-destructive">
+            {formState.fieldErrors.priceInCents}
+          </div>
+        )}
         <div className="text-muted-foreground">
           {formatCurrency((priceInCents || 0) / 100)}
         </div>
@@ -61,6 +78,11 @@ export function AddProductForm() {
       <div className="space-y-2">
         <Label htmlFor="description">Description</Label>
         <Textarea id="description" name="description" required />
+        {formState.fieldErrors?.description && (
+          <div className="text-destructive">
+            {formState.fieldErrors.description}
+          </div>
+        )}
       </div>
       <div className="space-y-2 grid">
         <Label htmlFor="availableForPurchase">Available For Purchase</Label>
@@ -73,9 +95,17 @@ export function AddProductForm() {
           />
           <p className="text-muted-foreground">{available ? "Yes" : "No"}</p>
         </div>
+        {formState.fieldErrors?.availableForPurchase && (
+          <div className="text-destructive">
+            {formState.fieldErrors.availableForPurchase}
+          </div>
+        )}
       </div>
       <div className="space-y-2">
         <TagSelection tags={tags} setTags={setTags} />
+        {formState.fieldErrors?.tags && (
+          <div className="text-destructive">{formState.fieldErrors.tags}</div>
+        )}
       </div>
       <SubmitButton />
     </form>
