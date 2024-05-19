@@ -8,9 +8,11 @@ import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { Switch } from "../ui/switch";
 import { addProduct } from "@/app/admin/_actions/products";
-import { redirect } from "next/navigation";
+import { useFormState, useFormStatus } from "react-dom";
 
 export function AddProductForm() {
+  const initialActionState = { message: "" };
+  const [state, formAction] = useFormState(addProduct, initialActionState);
   const [priceInCents, setPriceInCents] = useState<number>();
   const [tags, setTags] = useState<string[]>([]);
   const [available, setAvailable] = useState<boolean>(true);
@@ -20,16 +22,13 @@ export function AddProductForm() {
   }
 
   async function handleSubmit(formData: FormData) {
-    /*     formData.append("availableForPurchase", JSON.stringify(available));
+    formData.append("availableForPurchase", JSON.stringify(available));
     formData.append("tags", JSON.stringify(tags));
-    const response = await addProduct(formData);
-    if (response.success === true) {
-      redirect("/admin/products");
-    } */
+    formAction(formData);
   }
 
   return (
-    <form action={handleSubmit} className="space-y-8">
+    <form action={formAction} className="space-y-8">
       <div className="space-y-2">
         <Label htmlFor="name">Name</Label>
         <Input type="text" id="name" name="name" required />
@@ -71,7 +70,7 @@ export function AddProductForm() {
       <div className="space-y-2">
         <TagSelection tags={tags} setTags={setTags} />
       </div>
-      <Button type="submit">Save</Button>
+      <SubmitButton />
     </form>
   );
 }
@@ -139,5 +138,14 @@ function TagSelection({
         })}
       </div>
     </>
+  );
+}
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" disabled={pending}>
+      {pending ? "Saving..." : "Save"}
+    </Button>
   );
 }
