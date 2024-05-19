@@ -14,7 +14,7 @@ interface ProductDataObject {
   tags: string[];
 }
 
-// Zod Validation
+// Zod Schema
 const fileSchema = z.instanceof(File, { message: "Required" });
 const imageSchema = fileSchema.refine(
   (file) => file.size === 0 || file.type.startsWith("image/")
@@ -92,7 +92,7 @@ async function createOrUpdateTags(
   return tags;
 }
 
-export async function addProduct(formData: FormData) {
+export async function addProduct(prevState: any, formData: FormData) {
   // JSON.parse to convert from strings to values
   const dataEntriesRes = dataEntriesFromForm(formData);
   if (!dataEntriesRes.success) return dataEntriesRes;
