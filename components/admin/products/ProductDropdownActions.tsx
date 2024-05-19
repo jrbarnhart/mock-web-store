@@ -1,6 +1,9 @@
 "use client";
 
-import { toggleProductAvailable } from "@/app/admin/_actions/productActions";
+import {
+  deleteProduct,
+  toggleProductAvailable,
+} from "@/app/admin/_actions/productActions";
 import prisma from "@/components/db/db";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { useTransition } from "react";
@@ -26,4 +29,24 @@ export function ToggleAvailableDropdownItem({
   );
 }
 
-export function DeleteDropdownItem() {}
+export function DeleteDropdownItem({
+  id,
+  disabled,
+}: {
+  id: string;
+  disabled: boolean;
+}) {
+  const [isPending, startTransition] = useTransition();
+  return (
+    <DropdownMenuItem
+      disabled={disabled || isPending}
+      onClick={() => {
+        startTransition(async () => {
+          await deleteProduct(id);
+        });
+      }}
+    >
+      Delete
+    </DropdownMenuItem>
+  );
+}
