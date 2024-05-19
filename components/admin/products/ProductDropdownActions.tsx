@@ -1,9 +1,11 @@
+"use client";
+
 import { toggleProductAvailable } from "@/app/admin/_actions/productActions";
 import prisma from "@/components/db/db";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { useTransition } from "react";
 
-export function AvailableToggleDropdownItem({
+export function ToggleAvailableDropdownItem({
   id,
   availableForPurchase,
 }: {
