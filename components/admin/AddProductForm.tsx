@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, SetStateAction, useState } from "react";
+import { useRef, SetStateAction, useState, useEffect } from "react";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { formatCurrency } from "@/lib/formatters";
@@ -9,10 +9,11 @@ import { Button } from "../ui/button";
 import { Switch } from "../ui/switch";
 import { addProduct } from "@/app/admin/_actions/products";
 import { useFormState, useFormStatus } from "react-dom";
+import { redirect } from "next/navigation";
 
 export function AddProductForm() {
   const initialActionState = { message: "" };
-  const [state, formAction] = useFormState(addProduct, initialActionState);
+  const [formState, formAction] = useFormState(addProduct, initialActionState);
   const [priceInCents, setPriceInCents] = useState<number>();
   const [tags, setTags] = useState<string[]>([]);
   const [available, setAvailable] = useState<boolean>(true);
@@ -27,8 +28,14 @@ export function AddProductForm() {
     formAction(formData);
   }
 
+  useEffect(() => {
+    if ("success" in formState && formState.success === true) {
+      redirect("/admin/products");
+    }
+  }, [formState]);
+
   return (
-    <form action={formAction} className="space-y-8">
+    <form action={handleSubmit} className="space-y-8">
       <div className="space-y-2">
         <Label htmlFor="name">Name</Label>
         <Input type="text" id="name" name="name" required />
