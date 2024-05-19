@@ -1,4 +1,5 @@
 import { PageHeader } from "@/components/admin/PageHeader";
+import { ToggleAvailableDropdownItem } from "@/components/admin/products/ProductDropdownActions";
 import prisma from "@/components/db/db";
 import { Button } from "@/components/ui/button";
 import {
@@ -94,6 +95,10 @@ async function ProductsTable() {
                       Edit
                     </Link>
                   </DropdownMenuItem>
+                  <ToggleAvailableDropdownItem
+                    id={product.id}
+                    availableForPurchase={product.availableForPurchase}
+                  ></ToggleAvailableDropdownItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </TableCell>
