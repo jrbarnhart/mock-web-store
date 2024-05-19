@@ -4,15 +4,7 @@ import { z } from "zod";
 import { put } from "@vercel/blob";
 import prisma from "@/components/db/db";
 import { Prisma, Tag } from "@prisma/client";
-
-interface ProductDataObject {
-  name: string;
-  description: string;
-  priceInCents: number;
-  image: File;
-  availableForPurchase: boolean;
-  tags: string[];
-}
+import { ProductDataObject, ActionResponse } from "@/lib/types";
 
 // Zod Schema
 const fileSchema = z.instanceof(File, { message: "Required" });
@@ -45,14 +37,18 @@ function dataEntriesFromForm(formData: FormData) {
         dataEntries.availableForPurchase = JSON.parse(availableValue);
       }
     }
-    return { success: true, message: "Data entries parsed.", dataEntries };
+    return {
+      success: true,
+      message: "Data entries parsed.",
+      payload: dataEntries,
+    } as ActionResponse;
   } catch (error) {
     console.error("Failure: JSON parsing formData.", error);
     return {
       success: false,
       message: "Failure: JSON parsing formData.",
-      dataEntries: null,
-    };
+      error,
+    } as ActionResponse;
   }
 }
 
@@ -63,15 +59,20 @@ async function uploadImage(data: ProductDataObject) {
   });
 
   if (imageSource === undefined || imageSource === "") {
+    const error = new Error("Failure: Uploading image to Vercel Blob.");
     console.error("Failure: Uploading image to Vercel Blob.");
     return {
       success: false,
-      imageSource: "",
       message: "Failure: Uploading image to Vercel Blob.",
-    };
+      error,
+    } as ActionResponse;
   }
 
-  return { success: true, imageSource, message: "Image upload complete." };
+  return {
+    success: true,
+    payload: imageSource,
+    message: "Image upload complete.",
+  } as ActionResponse;
 }
 
 async function createOrUpdateTags(
@@ -98,7 +99,7 @@ export async function addProduct(prevState: any, formData: FormData) {
   if (!dataEntriesRes.success) return dataEntriesRes;
 
   // Validate dataEntries into data with Zod
-  const zodResult = addProductSchema.safeParse(dataEntriesRes.dataEntries);
+  const zodResult = addProductSchema.safeParse(dataEntriesRes.payload);
   if (zodResult.success === false) {
     console.error(
       "Failure: Zod validation.",
@@ -108,7 +109,7 @@ export async function addProduct(prevState: any, formData: FormData) {
       success: false,
       message: "Failure: Zod validation.",
       error: zodResult.error.formErrors.fieldErrors,
-    };
+    } as ActionResponse;
   }
   const data = zodResult.data;
 
@@ -124,7 +125,7 @@ export async function addProduct(prevState: any, formData: FormData) {
           name: data.name,
           description: data.description,
           priceInCents: data.priceInCents,
-          imageSource: uploadImageRes.imageSource,
+          imageSource: uploadImageRes.payload,
           availableForPurchase: data.availableForPurchase,
         },
       });
@@ -133,7 +134,7 @@ export async function addProduct(prevState: any, formData: FormData) {
       const tags = await createOrUpdateTags(data.tags, tx);
       const tagsIds = tags.map((tag) => ({ id: tag.id }));
 
-      // Create junction table entries for productTags
+      // Create join table entries for productTags
       await tx.productTag.createMany({
         data: tagsIds.map((tagId) => ({
           tagId: tagId.id,
@@ -142,12 +143,12 @@ export async function addProduct(prevState: any, formData: FormData) {
       });
     });
 
-    return { success: true, message: "Product created." };
+    return { success: true, message: "Product created." } as ActionResponse;
   } catch (error) {
     console.error("Failure: Add product to database.", error);
     return {
       success: false,
       message: "Failure: Add product to database.",
-    };
+    } as ActionResponse;
   }
 }
