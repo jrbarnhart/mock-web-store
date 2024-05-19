@@ -1,12 +1,12 @@
 "use client";
 
 import { useRef, SetStateAction, useState, useEffect } from "react";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
+import { Input } from "../../ui/input";
+import { Label } from "../../ui/label";
 import { formatCurrency } from "@/lib/formatters";
-import { Textarea } from "../ui/textarea";
-import { Button } from "../ui/button";
-import { Switch } from "../ui/switch";
+import { Textarea } from "../../ui/textarea";
+import { Button } from "../../ui/button";
+import { Switch } from "../../ui/switch";
 import { addProduct } from "@/app/admin/_actions/addProduct";
 import { useFormState, useFormStatus } from "react-dom";
 import { redirect } from "next/navigation";
