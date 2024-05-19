@@ -9,11 +9,12 @@ import { ProductDataObject, ActionResponse } from "@/lib/types";
 // Zod Schema
 const fileSchema = z.instanceof(File, { message: "Required" });
 const imageSchema = fileSchema.refine(
-  (file) => file.size === 0 || file.type.startsWith("image/")
+  (file) => file.size === 0 || file.type.startsWith("image/"),
+  "File must be an image"
 );
 const addProductSchema = z.object({
-  name: z.string().min(1),
-  description: z.string().min(1),
+  name: z.string().trim().min(1, "Name required."),
+  description: z.string().trim().min(1, "Description required."),
   priceInCents: z.coerce.number().int().min(1),
   image: imageSchema.refine((file) => file.size > 0, "Required"),
   availableForPurchase: z.boolean(),
