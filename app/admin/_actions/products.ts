@@ -47,7 +47,6 @@ function dataEntriesFromForm(formData: FormData) {
     return {
       success: false,
       message: "Failure: JSON parsing formData.",
-      error,
     } as ActionResponse;
   }
 }
@@ -59,12 +58,10 @@ async function uploadImage(data: ProductDataObject) {
   });
 
   if (imageSource === undefined || imageSource === "") {
-    const error = new Error("Failure: Uploading image to Vercel Blob.");
     console.error("Failure: Uploading image to Vercel Blob.");
     return {
       success: false,
       message: "Failure: Uploading image to Vercel Blob.",
-      error,
     } as ActionResponse;
   }
 
@@ -108,7 +105,7 @@ export async function addProduct(prevState: any, formData: FormData) {
     return {
       success: false,
       message: "Failure: Zod validation.",
-      error: zodResult.error.formErrors.fieldErrors,
+      fieldErrors: zodResult.error.formErrors.fieldErrors,
     } as ActionResponse;
   }
   const data = zodResult.data;
