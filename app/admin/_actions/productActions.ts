@@ -14,6 +14,6 @@ export async function toggleProductAvailable(
 }
 
 export async function deleteProduct(id: string) {
-  const product = prisma.product.delete({ where: { id } });
+  const product = await prisma.product.delete({ where: { id } });
   if (product === null) return notFound();
 }
