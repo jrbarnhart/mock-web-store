@@ -1,3 +1,5 @@
+"use server";
+
 import prisma from "@/components/db/db";
 
 export async function toggleProductAvailable(
