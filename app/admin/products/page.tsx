@@ -1,11 +1,15 @@
 import { PageHeader } from "@/components/admin/PageHeader";
-import { ToggleAvailableDropdownItem } from "@/components/admin/products/ProductDropdownActions";
+import {
+  DeleteDropdownItem,
+  ToggleAvailableDropdownItem,
+} from "@/components/admin/products/ProductDropdownActions";
 import prisma from "@/components/db/db";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -98,7 +102,12 @@ async function ProductsTable() {
                   <ToggleAvailableDropdownItem
                     id={product.id}
                     availableForPurchase={product.availableForPurchase}
-                  ></ToggleAvailableDropdownItem>
+                  />
+                  <DropdownMenuSeparator />
+                  <DeleteDropdownItem
+                    id={product.id}
+                    disabled={product._count.orderItems > 0}
+                  />
                 </DropdownMenuContent>
               </DropdownMenu>
             </TableCell>
