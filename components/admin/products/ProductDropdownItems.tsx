@@ -6,6 +6,7 @@ import {
 } from "@/app/admin/_actions/productActions";
 import prisma from "@/components/db/db";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 
 export function ToggleAvailableDropdownItem({
@@ -16,11 +17,13 @@ export function ToggleAvailableDropdownItem({
   availableForPurchase: boolean;
 }) {
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
   return (
     <DropdownMenuItem
       onClick={() => {
         startTransition(async () => {
           await toggleProductAvailable(id, !availableForPurchase);
+          router.refresh();
         });
       }}
     >
@@ -37,6 +40,7 @@ export function DeleteDropdownItem({
   disabled: boolean;
 }) {
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
   return (
     <DropdownMenuItem
       variant="destructive"
@@ -44,6 +48,7 @@ export function DeleteDropdownItem({
       onClick={() => {
         startTransition(async () => {
           await deleteProduct(id);
+          router.refresh();
         });
       }}
     >
