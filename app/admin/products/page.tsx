@@ -2,7 +2,7 @@ import { PageHeader } from "@/components/admin/PageHeader";
 import {
   DeleteDropdownItem,
   ToggleAvailableDropdownItem,
-} from "@/components/admin/products/ProductDropdownActions";
+} from "@/components/admin/products/ProductDropdownItems";
 import prisma from "@/components/db/db";
 import { Button } from "@/components/ui/button";
 import {
