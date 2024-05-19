@@ -22,7 +22,7 @@ export function AddProductForm() {
   const [formState, formAction] = useFormState(addProduct, initialActionState);
   const [priceInCents, setPriceInCents] = useState<number>();
   const [tags, setTags] = useState<string[]>([]);
-  const [available, setAvailable] = useState<boolean>(true);
+  const [available, setAvailable] = useState<boolean>(false);
 
   function handleAvailableChanged() {
     setAvailable((prev) => !prev);
