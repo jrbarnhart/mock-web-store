@@ -4,7 +4,11 @@ import { z } from "zod";
 import { del, put } from "@vercel/blob";
 import prisma from "@/components/db/db";
 import { Prisma, Tag } from "@prisma/client";
-import { ProductDataObject, ActionResponse } from "@/lib/types";
+import {
+  ProductDataObject,
+  ActionResponse,
+  ProductWithTagNames,
+} from "@/lib/types";
 import { notFound } from "next/navigation";
 
 // Zod Schema
@@ -118,7 +122,20 @@ export async function updateProduct(
     } as ActionResponse;
   }
   const data = zodResult.data;
-  const product = await prisma.product.findUnique({ where: { id } });
+  const product: ProductWithTagNames | null = await prisma.product.findUnique({
+    where: { id },
+    include: {
+      tags: {
+        include: {
+          tag: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
+    },
+  });
 
   if (product === null) {
     return notFound();
@@ -136,7 +153,7 @@ export async function updateProduct(
       uploadImageSource = uploadImageRes.payload;
     }
 
-    // Create product data in database
+    // Update product data in database
     await prisma.$transaction(async (tx) => {
       const product = await tx.product.update({
         where: { id },
@@ -150,6 +167,8 @@ export async function updateProduct(
       });
 
       // Create or fetch tags
+      // const tagsToAdd
+      // const tagsToRemove
       const tags = await createOrUpdateTags(data.tags, tx);
       const tagsIds = tags.map((tag) => ({ id: tag.id }));
 
