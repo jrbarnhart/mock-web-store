@@ -73,6 +73,11 @@ export function AddProductForm({
           name="image"
           required={product === null}
         />
+        {product !== null && (
+          <div className="text-muted-foreground break-words">
+            {product?.imageSource}
+          </div>
+        )}
         {formState.fieldErrors?.image && (
           <div className="text-destructive">{formState.fieldErrors.image}</div>
         )}
