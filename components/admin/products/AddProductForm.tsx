@@ -11,8 +11,9 @@ import { addProduct } from "@/app/admin/_actions/addProduct";
 import { useFormState, useFormStatus } from "react-dom";
 import { redirect } from "next/navigation";
 import { ActionResponse } from "@/lib/types";
+import { Product } from "@prisma/client";
 
-export function AddProductForm() {
+export function AddProductForm({ product }: { product?: Product | null }) {
   const initialActionState: ActionResponse = {
     success: false,
     message: "",
