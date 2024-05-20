@@ -96,10 +96,9 @@ async function createOrUpdateTags(
 }
 
 export async function updateProduct(
-  prevState: any,
-  formData: FormData,
   id: string,
-  replacedImageSource?: string
+  prevState: any,
+  formData: FormData
 ) {
   // JSON.parse to convert from strings to values
   const dataEntriesRes = dataEntriesFromForm(formData);
@@ -129,13 +128,12 @@ export async function updateProduct(
     // Upload image to Vercel Blob
     let uploadImageSource: string = product.imageSource;
     if (data.image && data.image.size > 0) {
+      if (uploadImageSource !== "") {
+        await del(uploadImageSource);
+      }
       const uploadImageRes = await uploadImage(data.image);
       if (!uploadImageRes.success) return uploadImageRes;
       uploadImageSource = uploadImageRes.payload;
-      // Delete old image
-      if (replacedImageSource) {
-        await del(replacedImageSource);
-      }
     } else if (data.image && data.image.size <= 0) {
       console.error(
         "Failure: Uploading image to Vercel Blob. You cannot upload an empty file."
