@@ -11,6 +11,7 @@ import { addProduct } from "@/app/admin/_actions/addProduct";
 import { useFormState, useFormStatus } from "react-dom";
 import { redirect } from "next/navigation";
 import { ActionResponse, ProductWithTagNames } from "@/lib/types";
+import Image from "next/image";
 
 export function AddProductForm({
   product,
@@ -73,10 +74,13 @@ export function AddProductForm({
           name="image"
           required={product === null}
         />
-        {product !== null && (
-          <div className="text-muted-foreground break-words">
-            {product?.imageSource}
-          </div>
+        {product && product.imageSource && (
+          <Image
+            src={product.imageSource}
+            alt="Product Image"
+            height={300}
+            width={300}
+          />
         )}
         {formState.fieldErrors?.image && (
           <div className="text-destructive">{formState.fieldErrors.image}</div>
