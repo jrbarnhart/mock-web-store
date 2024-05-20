@@ -27,8 +27,12 @@ export function AddProductForm({
   const [priceInCents, setPriceInCents] = useState<number | undefined>(
     product?.priceInCents
   );
-  const [tags, setTags] = useState<string[]>([]);
-  const [available, setAvailable] = useState<boolean>(false);
+  const [tags, setTags] = useState<string[]>(
+    product?.tags ? product.tags.map((tag) => tag.tag.name) : []
+  );
+  const [available, setAvailable] = useState<boolean>(
+    product?.availableForPurchase || false
+  );
 
   function handleAvailableChanged() {
     setAvailable((prev) => !prev);
