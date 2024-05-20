@@ -165,12 +165,21 @@ export async function updateProduct(
 
       // Create or fetch tags
       const newTags = await createOrUpdateTags(data.tags, tx);
-      const newTagIds = newTags.map((tag) => ({ id: tag.id }));
+      const newTagIds = newTags.map((tag) => tag.id);
 
-      const removedTags = product.tags.filter((tag) => {
-        !newTagIds.includes({ id: tag.tag.id });
+      const oldTags = product.tags.map((productTag) => productTag.tag);
+      const oldTagIds = oldTags.map((oldTag) => oldTag.id);
+
+      const addedTags = newTags.filter((newTag) => {
+        return !oldTagIds.includes(newTag.id);
       });
-      const removedTagIds = removedTags.map((tag) => tag.tag.id);
+
+      const removedProductTags = product.tags.filter((productTag) => {
+        return !newTagIds.includes(productTag.tag.id);
+      });
+      const removedTagIds = removedProductTags.map(
+        (removedProductTag) => removedProductTag.tag.id
+      );
 
       // Delete join table entries for removed
       await tx.productTag.deleteMany({
@@ -183,7 +192,7 @@ export async function updateProduct(
 
       // Create join table entries for productTags
       await tx.productTag.createMany({
-        data: newTagIds.map((tagId) => ({
+        data: addedTags.map((tagId) => ({
           tagId: tagId.id,
           productId: updatedProduct.id,
         })),
