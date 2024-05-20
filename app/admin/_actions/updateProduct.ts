@@ -127,7 +127,7 @@ export async function updateProduct(
 
   try {
     // Upload image to Vercel Blob
-    let uploadImageSource: string = "";
+    let uploadImageSource: string = product.imageSource;
     if (data.image && data.image.size > 0) {
       const uploadImageRes = await uploadImage(data.image);
       if (!uploadImageRes.success) return uploadImageRes;
