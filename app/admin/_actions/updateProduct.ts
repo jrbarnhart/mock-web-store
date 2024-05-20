@@ -134,20 +134,12 @@ export async function updateProduct(
       const uploadImageRes = await uploadImage(data.image);
       if (!uploadImageRes.success) return uploadImageRes;
       uploadImageSource = uploadImageRes.payload;
-    } else if (data.image && data.image.size <= 0) {
-      console.error(
-        "Failure: Uploading image to Vercel Blob. You cannot upload an empty file."
-      );
-      return {
-        success: false,
-        message:
-          "Failure: Uploading image to Vercel Blob. You cannot upload an empty file.",
-      } as ActionResponse;
     }
 
     // Create product data in database
     await prisma.$transaction(async (tx) => {
-      const product = await tx.product.create({
+      const product = await tx.product.update({
+        where: { id },
         data: {
           name: data.name,
           description: data.description,
