@@ -12,6 +12,7 @@ import { useFormState, useFormStatus } from "react-dom";
 import { redirect } from "next/navigation";
 import { ActionResponse, ProductWithTagNames } from "@/lib/types";
 import Image from "next/image";
+import { updateProduct } from "@/app/admin/_actions/updateProduct";
 
 export function AddProductForm({
   product,
@@ -24,7 +25,10 @@ export function AddProductForm({
     payload: null,
     fieldErrors: null,
   };
-  const [formState, formAction] = useFormState(addProduct, initialActionState);
+  const [formState, formAction] = useFormState(
+    product == null ? addProduct : updateProduct.bind(null, product.id),
+    initialActionState
+  );
   const [priceInCents, setPriceInCents] = useState<number | undefined>(
     product?.priceInCents
   );
