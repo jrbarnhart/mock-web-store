@@ -175,7 +175,7 @@ export async function updateProduct(
       // Delete join table entries for removed
       await tx.productTag.deleteMany({
         where: {
-          id: {
+          tagId: {
             in: removedTagIds,
           },
         },
