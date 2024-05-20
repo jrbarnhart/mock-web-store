@@ -10,10 +10,13 @@ import { Switch } from "../../ui/switch";
 import { addProduct } from "@/app/admin/_actions/addProduct";
 import { useFormState, useFormStatus } from "react-dom";
 import { redirect } from "next/navigation";
-import { ActionResponse } from "@/lib/types";
-import { Product } from "@prisma/client";
+import { ActionResponse, ProductWithTagNames } from "@/lib/types";
 
-export function AddProductForm({ product }: { product?: Product | null }) {
+export function AddProductForm({
+  product,
+}: {
+  product?: ProductWithTagNames | null;
+}) {
   const initialActionState: ActionResponse = {
     success: false,
     message: "",
@@ -21,7 +24,9 @@ export function AddProductForm({ product }: { product?: Product | null }) {
     fieldErrors: null,
   };
   const [formState, formAction] = useFormState(addProduct, initialActionState);
-  const [priceInCents, setPriceInCents] = useState<number>();
+  const [priceInCents, setPriceInCents] = useState<number | undefined>(
+    product?.priceInCents
+  );
   const [tags, setTags] = useState<string[]>([]);
   const [available, setAvailable] = useState<boolean>(false);
 
