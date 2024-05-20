@@ -54,14 +54,25 @@ export function AddProductForm({
     <form action={handleSubmit} className="space-y-8">
       <div className="space-y-2">
         <Label htmlFor="name">Name</Label>
-        <Input type="text" id="name" name="name" required />
+        <Input
+          type="text"
+          id="name"
+          name="name"
+          defaultValue={product?.name || ""}
+          required
+        />
         {formState.fieldErrors?.name && (
           <div className="text-destructive">{formState.fieldErrors.name}</div>
         )}
       </div>
       <div className="space-y-2">
         <Label htmlFor="image">Image</Label>
-        <Input type="file" id="image" name="image" required />
+        <Input
+          type="file"
+          id="image"
+          name="image"
+          required={product === null}
+        />
         {formState.fieldErrors?.image && (
           <div className="text-destructive">{formState.fieldErrors.image}</div>
         )}
@@ -87,7 +98,12 @@ export function AddProductForm({
       </div>
       <div className="space-y-2">
         <Label htmlFor="description">Description</Label>
-        <Textarea id="description" name="description" required />
+        <Textarea
+          id="description"
+          name="description"
+          defaultValue={product?.description || ""}
+          required
+        />
         {formState.fieldErrors?.description && (
           <div className="text-destructive">
             {formState.fieldErrors.description}
