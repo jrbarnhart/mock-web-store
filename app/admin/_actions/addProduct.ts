@@ -55,6 +55,9 @@ function dataEntriesFromForm(formData: FormData) {
 async function uploadImage(data: ProductDataObject) {
   const imageFile = data.image;
   if (!imageFile) {
+    console.error(
+      "Failure: Uploading image to Vercel Blob. Image file not found."
+    );
     return {
       success: false,
       message: "Failure: Uploading image to Vercel Blob. Image file not found.",
