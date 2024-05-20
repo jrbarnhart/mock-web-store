@@ -54,6 +54,13 @@ function dataEntriesFromForm(formData: FormData) {
 
 async function uploadImage(data: ProductDataObject) {
   const imageFile = data.image;
+  if (!imageFile) {
+    return {
+      success: false,
+      message: "Failure: Uploading image to Vercel Blob. Image file not found.",
+    } as ActionResponse;
+  }
+
   const { url: imageSource } = await put(imageFile.name, imageFile, {
     access: "public",
   });
