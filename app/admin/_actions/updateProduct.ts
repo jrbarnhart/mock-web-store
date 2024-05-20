@@ -5,6 +5,7 @@ import { del, put } from "@vercel/blob";
 import prisma from "@/components/db/db";
 import { Prisma, Tag } from "@prisma/client";
 import { ProductDataObject, ActionResponse } from "@/lib/types";
+import { notFound } from "next/navigation";
 
 // Zod Schema
 const fileSchema = z.instanceof(File, { message: "Required" });
@@ -118,6 +119,11 @@ export async function updateProduct(
     } as ActionResponse;
   }
   const data = zodResult.data;
+  const product = await prisma.product.findUnique({ where: { id } });
+
+  if (product === null) {
+    return notFound();
+  }
 
   try {
     // Upload image to Vercel Blob
