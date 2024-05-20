@@ -8,6 +8,7 @@ import {
   ProductDataObject,
   ActionResponse,
   ProductWithTagNames,
+  ProductWithTags,
 } from "@/lib/types";
 import { notFound } from "next/navigation";
 
@@ -122,16 +123,12 @@ export async function updateProduct(
     } as ActionResponse;
   }
   const data = zodResult.data;
-  const product: ProductWithTagNames | null = await prisma.product.findUnique({
+  const product: ProductWithTags | null = await prisma.product.findUnique({
     where: { id },
     include: {
       tags: {
         include: {
-          tag: {
-            select: {
-              name: true,
-            },
-          },
+          tag: true,
         },
       },
     },
@@ -155,7 +152,7 @@ export async function updateProduct(
 
     // Update product data in database
     await prisma.$transaction(async (tx) => {
-      const product = await tx.product.update({
+      const updatedProduct = await tx.product.update({
         where: { id },
         data: {
           name: data.name,
@@ -167,16 +164,28 @@ export async function updateProduct(
       });
 
       // Create or fetch tags
-      // const tagsToAdd
-      // const tagsToRemove
-      const tags = await createOrUpdateTags(data.tags, tx);
-      const tagsIds = tags.map((tag) => ({ id: tag.id }));
+      const newTags = await createOrUpdateTags(data.tags, tx);
+      const newTagIds = newTags.map((tag) => ({ id: tag.id }));
+
+      const removedTags = product.tags.filter((tag) => {
+        !newTagIds.includes({ id: tag.tag.id });
+      });
+      const removedTagIds = removedTags.map((tag) => tag.tag.id);
+
+      // Delete join table entries for removed
+      await tx.productTag.deleteMany({
+        where: {
+          id: {
+            in: removedTagIds,
+          },
+        },
+      });
 
       // Create join table entries for productTags
       await tx.productTag.createMany({
-        data: tagsIds.map((tagId) => ({
+        data: newTagIds.map((tagId) => ({
           tagId: tagId.id,
-          productId: product.id,
+          productId: updatedProduct.id,
         })),
       });
     });
