@@ -1,3 +1,5 @@
+import { Prisma } from "@prisma/client";
+
 export interface ProductDataObject {
   name: string;
   description: string;
@@ -22,3 +24,17 @@ export interface ActionResponse {
   payload: any;
   fieldErrors: ProductFieldErrors | null;
 }
+
+export type ProductWithTagNames = Prisma.ProductGetPayload<{
+  include: {
+    tags: {
+      include: {
+        tag: {
+          select: {
+            name: true;
+          };
+        };
+      };
+    };
+  };
+}>;

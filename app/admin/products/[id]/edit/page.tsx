@@ -7,7 +7,21 @@ export default async function EditProductPage({
 }: {
   params: { id: string };
 }) {
-  const product = await prisma.product.findUnique({ where: { id } });
+  const product = await prisma.product.findUnique({
+    where: { id },
+    include: {
+      tags: {
+        include: {
+          tag: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
   return (
     <>
       <PageHeader>Edit Product</PageHeader>
