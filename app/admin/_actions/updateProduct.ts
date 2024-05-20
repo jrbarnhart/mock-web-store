@@ -137,6 +137,9 @@ export async function updateProduct(
         await del(replacedImageSource);
       }
     } else if (data.image && data.image.size <= 0) {
+      console.error(
+        "Failure: Uploading image to Vercel Blob. You cannot upload an empty file."
+      );
       return {
         success: false,
         message:
