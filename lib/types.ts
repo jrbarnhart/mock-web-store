@@ -4,7 +4,7 @@ export interface ProductDataObject {
   name: string;
   description: string;
   priceInCents: number;
-  image: File;
+  image: File | undefined;
   availableForPurchase: boolean;
   tags: string[];
 }
