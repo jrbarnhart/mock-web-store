@@ -128,7 +128,7 @@ export async function updateProduct(
   try {
     // Upload image to Vercel Blob
     let uploadImageSource: string = "";
-    if (data.image) {
+    if (data.image && data.image.size > 0) {
       const uploadImageRes = await uploadImage(data.image);
       if (!uploadImageRes.success) return uploadImageRes;
       uploadImageSource = uploadImageRes.payload;
@@ -136,6 +136,12 @@ export async function updateProduct(
       if (replacedImageSource) {
         await del(replacedImageSource);
       }
+    } else if (data.image && data.image.size <= 0) {
+      return {
+        success: false,
+        message:
+          "Failure: Uploading image to Vercel Blob. You cannot upload an empty file.",
+      } as ActionResponse;
     }
 
     // Create product data in database
