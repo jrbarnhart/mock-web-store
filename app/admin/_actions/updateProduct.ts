@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { put } from "@vercel/blob";
+import { del, put } from "@vercel/blob";
 import prisma from "@/components/db/db";
 import { Prisma, Tag } from "@prisma/client";
 import { ProductDataObject, ActionResponse } from "@/lib/types";
@@ -19,6 +19,10 @@ const addProductSchema = z.object({
   image: imageSchema.refine((file) => file.size > 0, "Required"),
   availableForPurchase: z.boolean(),
   tags: z.string().array(),
+});
+
+const updateProductSchema = addProductSchema.extend({
+  image: imageSchema.optional(),
 });
 
 // Helper functions
@@ -52,8 +56,7 @@ function dataEntriesFromForm(formData: FormData) {
   }
 }
 
-async function uploadImage(data: ProductDataObject) {
-  const imageFile = data.image;
+async function uploadImage(imageFile: File) {
   const { url: imageSource } = await put(imageFile.name, imageFile, {
     access: "public",
   });
@@ -102,7 +105,7 @@ export async function updateProduct(
   if (!dataEntriesRes.success) return dataEntriesRes;
 
   // Validate dataEntries into data with Zod
-  const zodResult = addProductSchema.safeParse(dataEntriesRes.payload);
+  const zodResult = updateProductSchema.safeParse(dataEntriesRes.payload);
   if (zodResult.success === false) {
     console.error(
       "Failure: Zod validation.",
@@ -118,8 +121,16 @@ export async function updateProduct(
 
   try {
     // Upload image to Vercel Blob
-    const uploadImageRes = await uploadImage(data);
-    if (!uploadImageRes.success) return uploadImageRes;
+    let uploadImageSource: string = "";
+    if (data.image) {
+      const uploadImageRes = await uploadImage(data.image);
+      if (!uploadImageRes.success) return uploadImageRes;
+      uploadImageSource = uploadImageRes.payload;
+      // Delete old image
+      if (replacedImageSource) {
+        await del(replacedImageSource);
+      }
+    }
 
     // Create product data in database
     await prisma.$transaction(async (tx) => {
@@ -128,7 +139,7 @@ export async function updateProduct(
           name: data.name,
           description: data.description,
           priceInCents: data.priceInCents,
-          imageSource: uploadImageRes.payload,
+          imageSource: uploadImageSource,
           availableForPurchase: data.availableForPurchase,
         },
       });
