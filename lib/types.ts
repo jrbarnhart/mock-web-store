@@ -38,3 +38,13 @@ export type ProductWithTagNames = Prisma.ProductGetPayload<{
     };
   };
 }>;
+
+export type ProductWithTags = Prisma.ProductGetPayload<{
+  include: {
+    tags: {
+      include: {
+        tag: true;
+      };
+    };
+  };
+}>;
