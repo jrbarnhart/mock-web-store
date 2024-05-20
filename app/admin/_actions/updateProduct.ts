@@ -11,6 +11,7 @@ import {
   ProductWithTags,
 } from "@/lib/types";
 import { notFound } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 // Zod Schema
 const fileSchema = z.instanceof(File, { message: "Required" });
@@ -198,6 +199,8 @@ export async function updateProduct(
         })),
       });
     });
+
+    revalidatePath(`admin/products/${product.id}/edit`);
 
     return { success: true, message: "Product created." } as ActionResponse;
   } catch (error) {
