@@ -1,3 +1,4 @@
+import ProductCard from "@/components/shop/products/ProductCard";
 import { Button } from "@/components/ui/button";
 import { getPopularProducts, getRecentProducts } from "@/lib/queryProducts";
 import { ProductFetcher } from "@/lib/types";
@@ -16,7 +17,7 @@ export default function HomePage() {
   );
 }
 
-function ProductGridSection({
+async function ProductGridSection({
   productFetcher,
   title,
 }: {
@@ -33,6 +34,11 @@ function ProductGridSection({
             <ArrowRight className="size-4" />
           </Link>
         </Button>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {(await productFetcher()).map((product) => (
+          <ProductCard key={product.id} {...product} />
+        ))}
       </div>
     </div>
   );
