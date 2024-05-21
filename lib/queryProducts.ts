@@ -1,6 +1,6 @@
 import prisma from "@/components/db/db";
 
-function getProducts() {
+export function getPopularProducts() {
   return prisma.product.findMany({
     where: { availableForPurchase: true },
     orderBy: {
@@ -12,7 +12,7 @@ function getProducts() {
   });
 }
 
-function getRecentProducts() {
+export function getRecentProducts() {
   return prisma.product.findMany({
     where: { availableForPurchase: true },
     orderBy: {
