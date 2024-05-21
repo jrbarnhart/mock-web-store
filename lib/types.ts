@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, Product } from "@prisma/client";
 
 export interface ProductDataObject {
   name: string;
@@ -48,3 +48,5 @@ export type ProductWithTags = Prisma.ProductGetPayload<{
     };
   };
 }>;
+
+export type ProductFetcher = () => Promise<Product[] | Product>;
