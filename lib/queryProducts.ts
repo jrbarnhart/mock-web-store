@@ -1,5 +1,9 @@
 import prisma from "@/components/db/db";
 
+export function getAvailableProducts() {
+  return prisma.product.findMany({ where: { availableForPurchase: true } });
+}
+
 export function getPopularProducts() {
   return prisma.product.findMany({
     where: { availableForPurchase: true },
