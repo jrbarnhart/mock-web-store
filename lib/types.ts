@@ -49,4 +49,4 @@ export type ProductWithTags = Prisma.ProductGetPayload<{
   };
 }>;
 
-export type ProductFetcher = () => Promise<Product[] | Product>;
+export type ProductFetcher = () => Promise<Product[]>;
