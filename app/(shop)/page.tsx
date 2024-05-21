@@ -42,9 +42,9 @@ function ProductGridSection({
         <Suspense
           fallback={
             <>
-              <ProductCardSkeleton></ProductCardSkeleton>
-              <ProductCardSkeleton></ProductCardSkeleton>
-              <ProductCardSkeleton></ProductCardSkeleton>
+              <ProductCardSkeleton />
+              <ProductCardSkeleton />
+              <ProductCardSkeleton />
             </>
           }
         >
