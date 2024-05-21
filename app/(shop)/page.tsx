@@ -1,9 +1,12 @@
-import ProductCard from "@/components/shop/products/ProductCard";
+import ProductCard, {
+  ProductCardSkeleton,
+} from "@/components/shop/products/ProductCard";
 import { Button } from "@/components/ui/button";
 import { getPopularProducts, getRecentProducts } from "@/lib/queryProducts";
 import { ProductFetcher } from "@/lib/types";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { Suspense } from "react";
 
 export default function HomePage() {
   return (
@@ -17,7 +20,7 @@ export default function HomePage() {
   );
 }
 
-async function ProductGridSection({
+function ProductGridSection({
   productFetcher,
   title,
 }: {
@@ -36,10 +39,28 @@ async function ProductGridSection({
         </Button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {(await productFetcher()).map((product) => (
-          <ProductCard key={product.id} {...product} />
-        ))}
+        <Suspense
+          fallback={
+            <>
+              <ProductCardSkeleton></ProductCardSkeleton>
+              <ProductCardSkeleton></ProductCardSkeleton>
+              <ProductCardSkeleton></ProductCardSkeleton>
+            </>
+          }
+        >
+          <ProductSuspense productFetcher={productFetcher} />
+        </Suspense>
       </div>
     </div>
   );
+}
+
+async function ProductSuspense({
+  productFetcher,
+}: {
+  productFetcher: ProductFetcher;
+}) {
+  return (await productFetcher()).map((product) => (
+    <ProductCard key={product.id} {...product} />
+  ));
 }
