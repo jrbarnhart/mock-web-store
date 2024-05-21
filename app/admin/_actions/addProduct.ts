@@ -5,6 +5,7 @@ import { put } from "@vercel/blob";
 import prisma from "@/components/db/db";
 import { Prisma, Tag } from "@prisma/client";
 import { ProductDataObject, ActionResponse } from "@/lib/types";
+import { revalidatePath } from "next/cache";
 
 // Zod Schema
 const fileSchema = z.instanceof(File, { message: "Required" });
@@ -150,6 +151,8 @@ export async function addProduct(prevState: any, formData: FormData) {
         })),
       });
     });
+
+    revalidatePath("/admin/products");
 
     return { success: true, message: "Product created." } as ActionResponse;
   } catch (error) {
