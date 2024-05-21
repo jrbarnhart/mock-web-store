@@ -55,9 +55,7 @@ export function ProductCardSkeleton() {
         <CardTitle>
           <div className="w-3/4 h-6 rounded-full bg-gray-300" />
         </CardTitle>
-        <CardDescription>
-          <div className="w-1/2 h-4 rounded-full bg-gray-300" />
-        </CardDescription>
+        <CardDescription className="w-1/2 h-4 rounded-full bg-gray-300"></CardDescription>
       </CardHeader>
       <CardContent className="space-y-2">
         <div className="w-full h-4 rounded-full bg-gray-300" />
